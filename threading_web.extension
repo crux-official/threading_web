@@ -1,27 +1,13 @@
-# The Emscripten implementation of the threading concern (its
-# implementation package; the concern interface is the threading package):
-# emscripten's stable pthreads support (SharedArrayBuffer + Atomics) is
-# the pool's backing. Two web facts shape the body (both named in the
-# source): (1) the pool workers must already exist when PoolCreate runs -
-# emscripten's -sPTHREAD_POOL_SIZE pre-run pool, baked by the project's
-# [platform.web] link_options (a pthread_create that needs a fresh Web
-# Worker cannot complete synchronously - it requires returning to the
-# event loop); (2) the browser main thread cannot block (Atomics.wait is
-# illegal there), so PoolWaitAll spins on the atomic completion counter -
-# deadlock-free because the job contract forbids workers from proxying
-# work to main (nothing needs the main thread to respond while it spins).
-# The page must be cross-origin isolated (COOP + COEP headers) for
-# SharedArrayBuffer: PoolCreate probes emscripten_has_threading_support()
-# and refuses named when it is false.
-format_version = 1
+format_version = 2
 name   = "threading_web"
 kind   = "implementation"
-api    = "threading"
-supported_platforms = ["web"]
-version        = "1.0.0"
-implements_api = "1.0.0"
+version = "2.0.0"
+implements = [
+  { interface = "threading", window = "1.0.0" },
+]
 requires = [
-  { package = "threading", window = "1.0.0" },
   { package = "memory", window = "1.1.0" },
   { package = "logging", window = "1.1.0" },
 ]
+source   = "threading_web.c"
+supported_platforms = ["web"]
